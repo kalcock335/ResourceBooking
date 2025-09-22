@@ -4,7 +4,7 @@ applications:
     disk_quota: 1G
     buildpacks:
       - nodejs_buildpack
-    command: npm ci && npm run build && npm start
+    command: npm ci && npm run build && npx prisma migrate deploy && npm start
     random-route: true
     env:
       NODE_ENV: production
