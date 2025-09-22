@@ -4,7 +4,7 @@ applications:
     disk_quota: 2G
     buildpacks:
       - nodejs_buildpack
-    command: npm ci && npm run build && npm prune --omit=dev && npm cache clean --force && npx prisma migrate deploy && npm start
+    command: npm start
     random-route: true
     env:
       NODE_ENV: production
