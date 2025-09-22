@@ -1,6 +1,6 @@
 applications:
   - name: ResourceBooking-1
-    memory: 512M
+    memory: 1G
     disk_quota: 2G
     buildpacks:
       - nodejs_buildpack
@@ -11,6 +11,7 @@ applications:
       NPM_CONFIG_PRODUCTION: false
       NEXT_TELEMETRY_DISABLED: "1"
       NEXT_DISABLE_SOURCEMAP: "true"
+      NODE_OPTIONS: "--max_old_space_size=1024"
       AUTH_TRUST_HOST: "true"
       # Set these in your space/manifest or via `cf set-env` before pushing
       # AUTH_SECRET: change_me
