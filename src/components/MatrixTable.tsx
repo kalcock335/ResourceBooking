@@ -157,6 +157,25 @@ export default function MatrixTable({ filters }: MatrixTableProps) {
 
   const allocations = (allocationsData as { data?: any[] })?.data || [];
   const weeks = (weeksData as { data?: any[] })?.data || [];
+  // Default the first week column to current week (Monday) if available
+  useEffect(() => {
+    if (Array.isArray(weeks) && weeks.length > 0 && !filters.weekStart) {
+      const today = new Date();
+      const d = new Date(today);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diff);
+      d.setHours(0, 0, 0, 0);
+      const currentMondayISO = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      const weekStarts = (weeks as any[]).map((w: any) => String(w.weekStart).slice(0, 10));
+      const chosen = weekStarts.includes(currentMondayISO)
+        ? currentMondayISO
+        : weekStarts.find(ws => new Date(ws) >= d) || weekStarts[0];
+      // Update the URL query building via filters by mutating a copy and triggering re-render
+      // Note: MatrixTable receives filters as props; the parent owns them. Ideally we'd lift this
+      // defaulting up, but to keep scope minimal, we just no-op here (the table renders all weeks anyway).
+    }
+  }, [weeks]);
   const availability = (availabilityData as { data?: any[] })?.data || [];
   const summaries = (summaryData as { data?: any[] })?.data || [];
 

@@ -32,6 +32,27 @@ export default function Filters({ onFiltersChange }: FiltersProps) {
     apiClient('/api/roles').then((data) => setAllRoles(Array.isArray((data as { data: any[] })?.data) ? (data as { data: any[] }).data : []));
   }, []);
 
+  // Set default weekStart to the current week's Monday once weeks are loaded
+  useEffect(() => {
+    if (!filters.weekStart && Array.isArray(weeks) && weeks.length > 0) {
+      const today = new Date();
+      const d = new Date(today);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diff);
+      d.setHours(0, 0, 0, 0);
+      const currentMondayISO = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      // Find the matching weekStart in the list; if not present, fall back to the first future/present week
+      const weekStarts = (weeks as any[]).map((w: any) => String(w.weekStart).slice(0, 10));
+      const chosen = weekStarts.includes(currentMondayISO)
+        ? currentMondayISO
+        : weekStarts.find(ws => new Date(ws) >= d) || weekStarts[0];
+      const newFilters = { ...filters, weekStart: chosen };
+      setFilters(newFilters);
+      onFiltersChange(newFilters);
+    }
+  }, [weeks]);
+
   const handleFilterChange = (key: keyof FilterParams, value: string) => {
     const newFilters = { ...filters, [key]: value, roleIds: filters.roleIds };
     setFilters(newFilters);
