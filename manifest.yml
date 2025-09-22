@@ -1,0 +1,17 @@
+applications:
+  - name: ResourceBooking-1
+    memory: 512M
+    disk_quota: 1G
+    buildpacks:
+      - nodejs_buildpack
+    command: npm ci && npm run build && npm start
+    random-route: true
+    env:
+      NODE_ENV: production
+      NPM_CONFIG_PRODUCTION: false
+      NEXT_TELEMETRY_DISABLED: "1"
+      AUTH_TRUST_HOST: "true"
+      # Set these in your space/manifest or via `cf set-env` before pushing
+      # AUTH_SECRET: change_me
+      # NEXTAUTH_URL: https://your-assigned-route
+
