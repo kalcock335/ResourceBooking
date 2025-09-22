@@ -1,15 +1,16 @@
 applications:
   - name: ResourceBooking-1
     memory: 512M
-    disk_quota: 1G
+    disk_quota: 2G
     buildpacks:
       - nodejs_buildpack
-    command: npm ci && npm run build && npx prisma migrate deploy && npm start
+    command: npm ci && npm run build && npm prune --omit=dev && npm cache clean --force && npx prisma migrate deploy && npm start
     random-route: true
     env:
       NODE_ENV: production
       NPM_CONFIG_PRODUCTION: false
       NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_DISABLE_SOURCEMAP: "true"
       AUTH_TRUST_HOST: "true"
       # Set these in your space/manifest or via `cf set-env` before pushing
       # AUTH_SECRET: change_me
