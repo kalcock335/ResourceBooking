@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Filters, { FilterParams } from '@/components/Filters';
-import MatrixTable from '@/components/MatrixTable';
-import Header from '@/components/Header';
-import NewAssignmentModal from '@/components/NewAssignmentModal';
 import { useSession } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import CalendarView from '@/components/CalendarView';
+import Filters, { FilterParams } from '@/components/Filters';
+import Header from '@/components/Header';
+import NewAssignmentModal from '@/components/NewAssignmentModal';
 
-export default function Home() {
+export default function CalendarPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [filters, setFilters] = useState<FilterParams>({ roleIds: [] });
@@ -26,8 +26,7 @@ export default function Home() {
   if (!session) return null;
 
   const handleAssignmentCreated = () => {
-    // This will trigger a refresh of the MatrixTable component
-    // The MatrixTable component should handle its own data refresh
+    // This will trigger a refresh of the CalendarView component
     window.location.reload(); // Simple refresh for now
   };
 
@@ -36,27 +35,16 @@ export default function Home() {
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Description and New Assignment Button */}
-        <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Matrix View</h1>
-            <p className="text-gray-600">
-              Manage resource allocations across projects and weeks. Click any cell to edit allocations or drag values to move them between weeks.
-            </p>
-          </div>
-          <button
-            onClick={() => setIsNewAssignmentModalOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          >
-            New Assignment
-          </button>
-        </div>
+
 
         {/* Filters */}
         <Filters onFiltersChange={setFilters} />
 
-        {/* Matrix Table */}
-        <MatrixTable filters={filters} />
+        {/* Calendar View */}
+        <CalendarView 
+          filters={filters} 
+          onNewAssignment={() => setIsNewAssignmentModalOpen(true)}
+        />
 
         {/* New Assignment Modal */}
         <NewAssignmentModal
@@ -67,4 +55,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+} 

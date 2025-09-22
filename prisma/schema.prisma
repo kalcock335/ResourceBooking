@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Resource {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  email     String   @unique
+  password  String?
+  jobTitle  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  allocations Allocation[]
+  holidays    Holiday[]
+  skills      ResourceSkill[]
+  roles       ResourceRole[]
+
+  @@map("resources")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  customer    String?
+  description String?
+  isActive    Boolean  @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  allocations Allocation[]
+}
+
+model WorkType {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  color       String?  // For UI styling
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  allocations Allocation[]
+
+  @@map("work_types")
+}
+
+model Holiday {
+  id         String   @id @default(cuid())
+  resourceId String
+  date       DateTime
+  reason     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, date])
+  @@map("holidays")
+}
+
+model Allocation {
+  id         String   @id @default(cuid())
+  resourceId String?
+  projectId  String?
+  workTypeId String?
+  weekStart  DateTime? // Start of the week (Monday)
+  days       Float?    // Number of days allocated (can be fractional)
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Unified fields
+  status     AllocationStatus @default(confirmed)
+  role       String? // For forecasts: required role
+  quantity   Int?    // For forecasts: number of resources needed
+  daysPerWeek Int?   // For forecasts: days per week
+  numWeeks   Int?    // For forecasts: number of weeks
+  startDate  DateTime? // For forecasts: planned start date
+
+  // Relations
+  resource  Resource?  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  project   Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  workType  WorkType?  @relation(fields: [workTypeId], references: [id], onDelete: Cascade)
+  requiredSkills AllocationSkill[]
+
+  @@map("allocations")
+}
+
+enum AllocationStatus {
+  forecast
+  confirmed
+}
+
+model AllocationSkill {
+  id           String   @id @default(cuid())
+  allocation   Allocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  allocationId String
+  skill        Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId      String
+  proficiency  String?
+  expiresBy    DateTime?
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  resources   ResourceSkill[]
+  allocationSkills AllocationSkill[] // Unified model only
+}
+
+model ResourceSkill {
+  id          String   @id @default(cuid())
+  resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  resourceId  String
+  skill       Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId     String
+  proficiency String?  // e.g., Beginner, Intermediate, Expert
+  expiresAt   DateTime? // For certifications
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([resourceId, skillId])
+}
+
+model Role {
+  id         String   @id @default(cuid())
+  name       String   @unique // e.g., 'Consultant', 'admin'
+  label      String           // e.g., 'Consultant', 'Admin'
+  isAdmin    Boolean  @default(false)
+  isPlannable Boolean @default(true)
+  resources  ResourceRole[]
+}
+
+model ResourceRole {
+  id         String   @id @default(cuid())
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  resourceId String
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId     String
+
+  @@unique([resourceId, roleId])
+} 
