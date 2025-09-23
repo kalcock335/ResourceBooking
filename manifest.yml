@@ -1,6 +1,6 @@
 applications:
   - name: ResourceBooking-1
-    memory: 1G
+    memory: 1Gis 
     disk_quota: 2G
     buildpacks:
       - nodejs_buildpack
